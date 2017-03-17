@@ -1,7 +1,0 @@
-C:\Users\Administrator\documents\visual studio 2017\Projects\EventLog1\EventLog1\bin\Debug\EventLog1.exe.config
-C:\Users\Administrator\documents\visual studio 2017\Projects\EventLog1\EventLog1\bin\Debug\EventLog1.exe
-C:\Users\Administrator\documents\visual studio 2017\Projects\EventLog1\EventLog1\bin\Debug\EventLog1.pdb
-C:\Users\Administrator\documents\visual studio 2017\Projects\EventLog1\EventLog1\bin\Debug\Newtonsoft.Json.dll
-C:\Users\Administrator\documents\visual studio 2017\Projects\EventLog1\EventLog1\bin\Debug\Newtonsoft.Json.xml
-C:\Users\Administrator\documents\visual studio 2017\Projects\EventLog1\EventLog1\obj\Debug\EventLog1.exe
-C:\Users\Administrator\documents\visual studio 2017\Projects\EventLog1\EventLog1\obj\Debug\EventLog1.pdb

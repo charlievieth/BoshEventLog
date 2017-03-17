@@ -210,10 +210,12 @@ namespace EventLogStream
             log = new EventLog(LogName);
 
             // This will trigger an exception if the log does not exist.
-            int x = log.Entries.Count;
+            // Otherwise we don't get an exception until Start(), which
+            // occurs in a Task.
+            int count = log.Entries.Count;
 
             streamAll = StreamAllEvents;
-            index = streamAll ? 0 : log.Entries.Count;
+            index = streamAll ? 0 : count;
 
             // TODO (CEV): Make streams configurable.
             stdout = Console.Out;
