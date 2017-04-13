@@ -22,10 +22,6 @@ namespace EventLogStream
         private Object logLock = new Object();
         //
         // Summary:
-        //     Index of the next event in the EventLogEntryCollection.
-        private int index = 0;
-        //
-        // Summary:
         //     Stream all events from the log, including past events.
         private bool streamAll = true;
         //
@@ -74,15 +70,20 @@ namespace EventLogStream
                     if (e.CategoryNumber == 0)
                     {
                         w.WriteValue("(0)");
-                    } else
+                    }
+                    else
                     {
                         w.WriteValue(e.Category);
                     }
                     w.WritePropertyName("CategoryNumber");
                     w.WriteValue(e.CategoryNumber);
 
-                    w.WritePropertyName("Data");
-                    w.WriteValue(e.Data);
+                    if (e.Data != null && e.Data.Length != 0)
+                    {
+                        w.WritePropertyName("Data");
+                        w.WriteValue(e.Data);
+                    }
+
                     w.WritePropertyName("EntryType");
                     w.WriteValue(e.EntryType.ToString());
 
@@ -106,8 +107,12 @@ namespace EventLogStream
                     w.WriteValue(e.TimeGenerated);
                     w.WritePropertyName("TimeWritten");
                     w.WriteValue(e.TimeWritten);
-                    w.WritePropertyName("UserName");
-                    w.WriteValue(e.UserName ?? "");
+
+                    if (e.UserName != null && e.UserName.Length != 0)
+                    {
+                        w.WritePropertyName("UserName");
+                        w.WriteValue(e.UserName);
+                    }
                     w.WriteEndObject();
 
                     return sw.ToString();
@@ -121,24 +126,9 @@ namespace EventLogStream
             {
                 lock (logLock)
                 {
-                    // Calling 'log.Entries.Count' is expensive, so use
-                    // two loops.  The first reduces the delta between
-                    // Count and our index, the second prints whatever
-                    // occurred during the first.
-                    int n = log.Entries.Count;
-                    while (index < n)
+                    foreach (EventLogEntry entry in log.Entries)
                     {
-                        using (EventLogEntry entry = log.Entries[index++])
-                        {
-                            stdout.WriteLine(ToJson(entry));
-                        }
-                    }
-                    while (index < log.Entries.Count)
-                    {
-                        using (EventLogEntry entry = log.Entries[index++])
-                        {
-                            stdout.WriteLine(ToJson(entry));
-                        }
+                        stdout.WriteLine(ToJson(entry));
                     }
                 }
             }
@@ -169,9 +159,7 @@ namespace EventLogStream
 
         protected virtual void Dispose(bool disposing)
         {
-            // Is this necessary in C# - are reads/writes to ints <= the native word size atomic?
-            if (Interlocked.CompareExchange(ref state, stateDisposed, stateStopped) == stateStopped ||
-                Interlocked.CompareExchange(ref state, stateDisposed, stateRunning) == stateRunning)
+            if (disposing && state != stateDisposed && log != null)
             {
                 log.Dispose();
             }
@@ -215,7 +203,6 @@ namespace EventLogStream
             int count = log.Entries.Count;
 
             streamAll = StreamAllEvents;
-            index = streamAll ? 0 : count;
 
             // TODO (CEV): Make streams configurable.
             stdout = Console.Out;

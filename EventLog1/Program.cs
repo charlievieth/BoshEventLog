@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using Newtonsoft.Json;
-
 
 namespace EventLogStream
 {
@@ -225,15 +221,23 @@ Options:
             Console.OutputEncoding = Encoding.UTF8;
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
 
-            // Parse command line arguments
-            ParseArgs(args);
+            // Parse command line arguments.  ParseArgs should exit on error,
+            // but wrap in a try-catch just to be safe.
+            try
+            {
+                ParseArgs(args);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine("Error parsing arguments: " + e.Message);
+                System.Environment.Exit(2);
+            }
 
             List<Task> tasks = new List<Task>();
             try
             {
                 foreach (string name in LogNames)
                 {
-                    Console.WriteLine(name);
                     EventLogStream log = new EventLogStream(name, streamAll);
                     EventStreams.Add(name, log);
                     tasks.Add(Task.Factory.StartNew(() => { log.Start(); }));
@@ -261,7 +265,7 @@ Options:
                 return;
             }
 
-            // Wait for shutdown event, in any...
+            // Wait for shutdown event, if any...
             shutdownEvent.WaitOne();
         }
     }

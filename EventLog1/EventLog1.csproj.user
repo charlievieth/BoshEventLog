@@ -14,6 +14,12 @@
     <VerifyUploadedFiles>false</VerifyUploadedFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <StartArguments>-all -exit Application "System " " Security" &gt; NUL</StartArguments>
+    <StartArguments>-all -exit Application System Security &gt; NUL</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <StartArguments>-all Application "System " " Security"</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <StartArguments>-all -exit Application System Security &gt; NUL</StartArguments>
   </PropertyGroup>
 </Project>
