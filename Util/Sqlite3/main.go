@@ -157,8 +157,9 @@ func main() {
 	}
 	// abort will rollback the transaction and delete the db file.
 	abort := func(err interface{}) {
-		os.Remove(dbname)
 		tx.Rollback()
+		db.Close()
+		os.Remove(dbname)
 		Fatal(err, 2) // skip 2 stack frames
 	}
 
