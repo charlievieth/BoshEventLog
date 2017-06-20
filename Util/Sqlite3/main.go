@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -99,18 +100,39 @@ Usage: %s EVENT_LOG DATABASE_NAME
 	os.Exit(2)
 }
 
+// Skips the UTF-8 BOM if present - because Windows
+func SkipBOM(f *os.File) error {
+	bom := []byte{0xEF, 0xBB, 0xBF}
+
+	b := make([]byte, 3)
+	if _, err := f.Read(b); err != nil {
+		return err
+	}
+	// If we found the BOM theres nothing to do as we've seeked
+	// past it, if we didn't find reset the read offset to 0.
+	if !bytes.Equal(b, bom) {
+		_, err := f.Seek(0, 0)
+		return err
+	}
+	return nil
+}
+
 func main() {
 	if len(os.Args) != 3 {
 		Usage()
 	}
-	dbname := os.Args[1]
-	recfile := os.Args[2]
+	recfile := os.Args[1]
+	dbname := os.Args[2]
 
 	f, err := os.Open(recfile)
 	if err != nil {
 		Fatal(err, 1)
 	}
 	defer f.Close()
+
+	if err := SkipBOM(f); err != nil {
+		Fatal(fmt.Sprintf("reading event log file (%s): %s", recfile, err), 1)
+	}
 
 	if fi, err := os.Stat(dbname); err == nil {
 		if fi.IsDir() {
